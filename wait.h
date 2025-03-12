@@ -6,12 +6,6 @@
 class Wait
 {
 public:
-
-    const int _RECV = 0x1;
-    const int _SEND = 0x2;
-    const int _ERROR = 0x4;
-
-public:
     Wait();
 
     // reset - clean memory struct to zero
@@ -21,10 +15,10 @@ public:
     bool lock_for_waiting(long max_lock_timeout);
 
     // setup socket handel to wait mask
-    void set_handle_to_mask(int handle, int mask);
+    void set_handle_to_recv(int handle);
 
     // check sock or file handels with mask
-    bool check_handle(int handle, int mask);
+    bool is_handle_to_recv(int handle);
 
 private:
 

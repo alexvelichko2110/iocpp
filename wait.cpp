@@ -24,27 +24,24 @@ bool Wait::lock_for_waiting(long max_lock_timeout)
     return select (_maxfd + 1, &_rset, &_wset, &_xset, (max_lock_timeout == -1) ? nullptr : &tv);
 }
 
-void Wait::set_handle_to_mask(int handle, int mask)
+void Wait::set_handle_to_recv(int handle)
 {
-    if (mask & _RECV)
-        FD_SET(handle, &_rset);
+    FD_SET(handle, &_rset);
 
-    if (mask & _SEND)
-        FD_SET(handle, &_wset);
+    // if (mask & _SEND)
+    //     FD_SET(handle, &_wset);
 
-    if (mask & _ERROR)
-        FD_SET(handle, &_xset);
+    // if (mask & _ERROR)
+    //     FD_SET(handle, &_xset);
 
     if (_maxfd < handle)
         _maxfd = handle;
 }
 
-bool Wait::check_handle(int handle, int mask)
+bool Wait::is_handle_to_recv(int handle)
 {
-    bool check = false;
+    bool check  = FD_ISSET(handle, &_rset);
 
-    if (mask & _RECV)
-        check = FD_ISSET(handle, &_rset);
 //        else
 //        if (mask & _SEND)
 //            check = FD_ISSET(handle, &_wset);
