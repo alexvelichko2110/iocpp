@@ -20,6 +20,9 @@ public:
     // check sock or file handels with mask
     bool is_handle_to_recv(int handle);
 
+    // check sock or file handels with mask
+    bool is_handle_to_send(int handle);
+
 private:
 
     int _maxfd;

@@ -40,7 +40,7 @@ Socket::Socket(int sock, const struct sockaddr_in* addr)
 }
 
 
-Socket* open (const std::string& hostname, int port)
+bool Socket::connect (const std::string& hostname, int port)
 {
     // create socket ...
     int sock = socket( AF_INET, SOCK_STREAM, 0);
@@ -48,6 +48,8 @@ Socket* open (const std::string& hostname, int port)
     if ( sock == -1 )
     {
         printf("error: create socket fd\n");
+
+        return false;
     }
 
     struct sockaddr_in addr;
@@ -55,19 +57,24 @@ Socket* open (const std::string& hostname, int port)
     build(addr, hostname, port);
 
     // connect ...
-    int result = connect(sock, (struct sockaddr *)&addr, sizeof(addr) );
+    int result = ::connect(sock, (struct sockaddr *)&addr, sizeof(addr) );
 
     if (result != 0)
     {
         printf("error: connect fail\n");
 
         close(sock);
+
+        return false;
     }
 
-    return new Socket(sock, &addr);
+    _sock = sock;
+    _addr = addr;
+
+    return true;
 }
 
-Socket* open (int port)
+bool Socket::listen (int port)
 {
     int max_queue = 5;
 
@@ -76,6 +83,8 @@ Socket* open (int port)
     if ( sock == -1 )
     {
         printf("error: create listen socket \n");
+
+        return false;
     }
 
     const int on = 1;
@@ -84,6 +93,8 @@ Socket* open (int port)
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void*) &on, sizeof(on) ) != 0)
     {
         printf("error: can't set reuse on socket \n");
+
+        return false;
     }
 
 
@@ -100,36 +111,37 @@ Socket* open (int port)
     }
 
     // ставим сокет на прослушку входящих запросов клиентов ...
-    if ( listen(sock, max_queue) == -1)
+    if ( ::listen(sock, max_queue) == -1)
     {
         printf("error: listen \n");
 
         close(sock);
     }
 
-    return new Socket(sock, &addr);
+    _sock = sock;
+    _addr = addr;
+
+    return true;
 }
 
-Socket* accept(Socket* sock)
+Socket Socket::accept()
 {
     struct sockaddr_in addr;
 
     socklen_t n = sizeof(addr);
 
 
-    int new_client_sock = accept(sock->get_socket(), (struct sockaddr *)&addr, &n);
+    int new_client_sock = ::accept(_sock, (struct sockaddr *)&addr, &n);
 
     if ( new_client_sock == -1 )
     {
         printf("error: accept socket \n");
-
-        return nullptr;
     }
 
 
-//    printf("conn: <port = %d> <host = %s> \n", port, host);
+    // printf("conn: <port = %d> <host = %s> \n", port, host);
 
-    return new Socket(new_client_sock, &addr);
+    return Socket(new_client_sock, &addr);
 }
 
 }

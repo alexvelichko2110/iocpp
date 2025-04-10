@@ -21,18 +21,14 @@ bool Wait::lock_for_waiting(long max_lock_timeout)
     tv.tv_sec = max_lock_timeout / 1000;
     tv.tv_usec = (max_lock_timeout % 1000) * 1000;
 
-    return select (_maxfd + 1, &_rset, &_wset, &_xset, (max_lock_timeout == -1) ? nullptr : &tv);
+    int rval = select (_maxfd + 1, &_rset, &_wset, &_xset, (max_lock_timeout == -1) ? nullptr : &tv);
+
+    return (rval > 0);
 }
 
 void Wait::set_handle_to_recv(int handle)
 {
     FD_SET(handle, &_rset);
-
-    // if (mask & _SEND)
-    //     FD_SET(handle, &_wset);
-
-    // if (mask & _ERROR)
-    //     FD_SET(handle, &_xset);
 
     if (_maxfd < handle)
         _maxfd = handle;
@@ -52,3 +48,16 @@ bool Wait::is_handle_to_recv(int handle)
     return check;
 }
 
+bool Wait::is_handle_to_send(int handle)
+{
+    bool check  = FD_ISSET(handle, &_wset);
+
+//        else
+//        if (mask & _SEND)
+//            check = FD_ISSET(handle, &_wset);
+//        else
+//        if (mask & _ERROR)
+//            check = FD_ISSET(handle, &_xset);
+
+    return check;
+}

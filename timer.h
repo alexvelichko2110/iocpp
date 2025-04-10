@@ -25,8 +25,8 @@ public:
         return std::chrono::system_clock::now();
     }
 
-    time_point_type get_time_point_experience (int seconds) {
-        return std::chrono::seconds(seconds) + _time_point;
+    time_point_type get_time_point_experience (int miliseconds) {
+        return std::chrono::milliseconds(miliseconds) + _time_point;
     }
 
 private:
